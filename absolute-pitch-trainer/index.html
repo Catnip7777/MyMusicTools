@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>绝对音感练习</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+  </div>
+
+  <main class="app">
+    <header class="header">
+      <h1>绝对音感练习</h1>
+      <p class="subtitle">听音辨键 · 点击琴键作答</p>
+    </header>
+
+    <section class="panel account-panel" aria-label="账号">
+      <div class="account-row account-row--main">
+        <div class="control-group account-input-group">
+          <label for="username-input">用户名</label>
+          <div class="account-input-wrap">
+            <input
+              type="text"
+              id="username-input"
+              class="text-input"
+              placeholder="输入用户名创建或登录"
+              maxlength="24"
+              autocomplete="username"
+            />
+            <button type="button" id="btn-account-login" class="btn-account">进入</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <label for="account-select">切换账号</label>
+          <select id="account-select" aria-label="切换账号">
+            <option value="">— 未选择 —</option>
+          </select>
+        </div>
+      </div>
+      <div class="account-row account-row--status">
+        <p id="account-status" class="account-status">未登录，请输入用户名后点击「进入」</p>
+        <div class="account-actions">
+          <button type="button" id="btn-account-reset" class="btn-ghost" disabled>重置成绩</button>
+          <button type="button" id="btn-account-delete" class="btn-ghost btn-ghost--danger" disabled>删除账号</button>
+        </div>
+      </div>
+      <p id="account-message" class="account-message" hidden></p>
+    </section>
+
+    <section class="panel controls">
+      <div class="control-group">
+        <label for="range-low">音域下限</label>
+        <select id="range-low" aria-label="音域下限"></select>
+      </div>
+      <div class="control-group">
+        <label for="range-high">音域上限</label>
+        <select id="range-high" aria-label="音域上限"></select>
+      </div>
+      <div class="control-group control-group--instrument">
+        <label for="instrument">乐器音色</label>
+        <select id="instrument" aria-label="乐器音色"></select>
+      </div>
+      <div class="control-group control-group--slider">
+        <label for="volume">
+          音量
+          <span id="volume-value" class="slider-value">85%</span>
+        </label>
+        <input type="range" id="volume" min="0" max="100" value="85" step="1" aria-valuetext="85%" />
+      </div>
+      <div class="control-group control-group--slider">
+        <label for="duration">
+          持续时间
+          <span id="duration-value" class="slider-value">2.8 秒</span>
+        </label>
+        <input
+          type="range"
+          id="duration"
+          min="5"
+          max="60"
+          value="28"
+          step="1"
+          aria-valuemin="0.5"
+          aria-valuemax="6"
+          aria-valuenow="2.8"
+        />
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="include-black" checked />
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label">包含黑键</span>
+      </label>
+    </section>
+
+    <section class="panel quiz">
+      <div class="score-row">
+        <span class="stat"><strong id="stat-correct">0</strong> 正确</span>
+        <span class="stat-divider">·</span>
+        <span class="stat"><strong id="stat-total">0</strong> 总计</span>
+        <span class="stat-divider">·</span>
+        <span class="stat"><strong id="stat-streak">0</strong> 连对</span>
+      </div>
+      <div class="quiz-actions">
+        <button type="button" id="btn-play" class="btn-primary">
+          <span class="btn-icon" aria-hidden="true">▶</span>
+          播放随机音高
+        </button>
+        <button type="button" id="btn-replay-question" class="btn-replay-quiz" disabled>
+          <span class="btn-icon" aria-hidden="true">↻</span>
+          重播本题
+        </button>
+      </div>
+      <p id="hint" class="hint">先点击上方按钮听音，再在琴键上作答</p>
+      <div id="feedback" class="feedback" hidden>
+        <p id="feedback-result" class="feedback-result"></p>
+        <p id="feedback-answer" class="feedback-answer"></p>
+        <button type="button" id="btn-next" class="btn-secondary">下一题</button>
+      </div>
+    </section>
+
+    <section class="piano-wrap" aria-label="虚拟钢琴">
+      <div id="piano" class="piano" role="group"></div>
+    </section>
+
+    <section id="replay-panel" class="panel replay-panel" hidden aria-label="本题重听">
+      <h2 class="replay-heading">本题回顾</h2>
+      <div class="replay-grid">
+        <div id="replay-guess-block" class="replay-card replay-card--guess" hidden>
+          <span class="replay-card-label">你的选择</span>
+          <span id="replay-guess-label" class="replay-card-note">—</span>
+          <button type="button" id="btn-replay-guess" class="btn-replay">▶ 重听</button>
+        </div>
+        <div id="replay-answer-block" class="replay-card replay-card--answer" hidden>
+          <span class="replay-card-label">正确答案</span>
+          <span id="replay-answer-label" class="replay-card-note">—</span>
+          <button type="button" id="btn-replay-answer" class="btn-replay">▶ 重听</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="settings.js"></script>
+  <script src="accounts.js"></script>
+  <script src="instruments.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
